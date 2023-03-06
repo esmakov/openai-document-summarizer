@@ -22,19 +22,13 @@ export const exampleRouter = createTRPCRouter({
     return "you can now see this secret message!";
   }),
 
-  getFiles: publicProcedure.query(async () => {
-    const response = await openai.listFiles();
-
-    return response;
-  }),
-
   getCompletion: publicProcedure
-    .input(z.object({ prompt: z.string() }))
+    .input(z.object({ max_tokens: z.number(), prompt: z.string() }))
     .query(async ({ input }) => {
       const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: input.prompt,
-        max_tokens: 100,
+        max_tokens: input.max_tokens,
         temperature: 0.6,
       });
 
