@@ -1,9 +1,11 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-
 import { api } from "~/utils/api";
 import { useState } from "react";
+
+import * as pdfjs from "pdfjs-dist";
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const SAMPLE_DOCUMENT = `
 Student Acceptance Manual
@@ -122,18 +124,43 @@ const Home: NextPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!file) return;
 
     const reader = new FileReader();
 
-    reader.onload = (e) => {
-      const text = e.target.result;
-      // Do something with the text here
-      setDocumentText(text as string);
-      console.log(text);
-    };
+    // if the file is a pdf
+    if (file.type === "application/pdf") {
+      reader.onload = async (e) => {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjs.getDocument(typedArray).promise;
+        const pages = [];
 
-    reader.readAsText(file);
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const text = textContent.items.map((item) => item.str).join(" ");
+          pages.push(text);
+        }
+
+        // Do something with the text content here
+        const pdfText = pages.join("\n\n");
+        console.log(pdfText);
+        // cut off pdfText if it goes over 200 chars
+        setDocumentText(pdfText.split("").slice(0, 200).join(""));
+      };
+
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.onload = (e) => {
+        const text = e.target.result;
+        // Do something with the text here
+        setDocumentText(text as string);
+        console.log(text);
+      };
+
+      reader.readAsText(file);
+    }
   };
 
   function handleCopy() {
@@ -149,27 +176,45 @@ const Home: NextPage = () => {
         <title>OpenAI File Summarizer</title>
         <meta name="description" content="Created by @esmakov" />
         <link rel="icon" href="/favicon.ico" />
+        <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js "></script>
+        <link
+          href="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/web/pdf_viewer.min.css "
+          rel="stylesheet"
+        ></link>
       </Head>
       <main className="flex flex-col items-center gap-4 p-4">
         <h1 className="text-center text-4xl font-bold">File Summarizer</h1>
         <p className="text-center text-xl">Upload a text file or PDF.</p>
         <p className="max-w-lg text-center text-2xl">{summaryText}</p>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center gap-2"
-        >
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <input
-            className="rounded-md border-2 border-gray-400 p-2 outline-none"
+            className="rounded-md border-2 border-slate-400 p-2 outline-none"
             type="file"
             onChange={handleFileChange}
           />
           <button
             type="submit"
-            className="rounded-md border-2  border-gray-500 p-2 px-6 outline-none"
+            className="rounded-md border-2  border-slate-500 p-2 px-6 outline-none"
           >
             Upload
           </button>
-          <button onClick={handleCopy}>Copy to Clipboard</button>
+          <button onClick={handleCopy}>
+            {/* From heroicons.com */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
+              />
+            </svg>
+          </button>
         </form>
       </main>
     </>
