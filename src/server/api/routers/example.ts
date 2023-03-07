@@ -6,6 +6,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { MAX_ALLOWED_RESPONSE_TOKENS } from "~/pages";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -23,7 +24,12 @@ export const exampleRouter = createTRPCRouter({
   }),
 
   getCompletion: publicProcedure
-    .input(z.object({ max_tokens: z.number(), prompt: z.string() }))
+    .input(
+      z.object({
+        max_tokens: z.number().max(MAX_ALLOWED_RESPONSE_TOKENS),
+        prompt: z.string(),
+      })
+    )
     .query(async ({ input }) => {
       const response = await openai.createCompletion({
         model: "text-davinci-003",
