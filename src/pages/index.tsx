@@ -202,13 +202,15 @@ const Home: NextPage = () => {
         ></link>
       </Head>
       <main className="flex flex-col items-center gap-4 p-4">
-        <h1 className="text-center text-4xl font-bold">Document Summarizer</h1>
+        <h1 className="text-center text-4xl font-bold text-gray-900">
+          Document Summarizer
+        </h1>
         <h2>Powered by OpenAI's Completions API</h2>
         <p className="text-center text-xl">Upload a text file or PDF.</p>
         <form onSubmit={handleDocumentUpload} className="flex flex-col gap-2">
           <div className="flex justify-center gap-2">
             <input
-              className="max-w-md rounded-md border-2 border-slate-400 p-2 outline-none"
+              className="max-w-md rounded-md border-2 border-slate-400 bg-gray-100 p-2 text-gray-900 outline-none"
               type="file"
               onChange={handleFileChange}
             />
@@ -234,17 +236,23 @@ const Home: NextPage = () => {
             <>
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <p>Document:</p>
+                  <label htmlFor="document">Document:</label>
                   <textarea
-                    className="text-md rounded-md border-2 border-slate-400 p-2 outline-none"
+                    name="document"
+                    id="document"
+                    rows={8}
+                    className="text-md wrap rounded-md border-2 border-slate-400 p-2 text-gray-900 shadow-sm outline-none ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-300"
                     value={documentText}
                     onChange={(e) => setDocumentText(e.target.value)}
                   ></textarea>
                 </div>
                 <div className="flex flex-col items-center">
-                  <p>Summary:</p>
+                  <label htmlFor="summary">Summary:</label>
                   <textarea
-                    className="text-md rounded-md border-2 border-slate-400 p-2 outline-none"
+                    name="summary"
+                    id="summary"
+                    rows={8}
+                    className="text-md wrap rounded-md border-2 border-slate-400 p-2 text-gray-900 shadow-sm outline-none ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-300"
                     value={summaryText}
                     onChange={(e) => setSummaryText(e.target.value)}
                   ></textarea>
