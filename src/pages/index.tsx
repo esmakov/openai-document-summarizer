@@ -113,11 +113,14 @@ const Home: NextPage = () => {
       temperature,
     },
     {
-      enabled: false,
+      // enabled: false,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
         console.log("data", data);
-        setSummaryText(data[0].text);
+        setSummaryText(data[0].text || "");
+      },
+      onError: (error) => {
+        console.error(error);
       },
     }
   );
@@ -169,6 +172,13 @@ const Home: NextPage = () => {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       setMaxTokens(Number(e.target.value));
+    }, 500);
+  };
+
+  const handleTemperatureChange = (e) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      setTemperature(Number(e.target.value));
     }, 500);
   };
 
@@ -265,6 +275,15 @@ const Home: NextPage = () => {
                   min="0"
                   max={MAX_ALLOWED_RESPONSE_TOKENS}
                   onChange={handleMaxTokensChange}
+                />
+              </div>
+              <div className="flex justify-center gap-2">
+                <label htmlFor="">Temperature: {temperature}</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="3"
+                  onChange={handleTemperatureChange}
                 />
               </div>
               <button

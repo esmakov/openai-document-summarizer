@@ -32,13 +32,14 @@ export const exampleRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: input.prompt,
-        max_tokens: input.max_tokens,
-        temperature: input.temperature,
-      });
-      console.log(response.data.choices[0]?.text);
-      return response.data.choices;
+      return "hit";
+      // const response = await openai.createCompletion({
+      //   model: "text-davinci-003",
+      //   prompt: input.prompt,
+      //   max_tokens: input.max_tokens,
+      //   temperature: input.temperature,
+      // });
+      // console.log(response.data.choices[0]?.text);
+      // return response.data.choices;
     }),
 });
