@@ -102,6 +102,8 @@ const Home: NextPage = () => {
   const [documentText, setDocumentText] = useState("");
   const [summaryText, setSummaryText] = useState("");
 
+  let timeoutId = null;
+
   const prompt = `You are a document summarizer. \n\nSTART DOCUMENT:\n\n${SAMPLE_DOCUMENT}\n\nEND DOCUMENT\n\nSUMMARY:${SAMPLE_SUMMARY}\n\nSTART DOCUMENT:\n\n${documentText}\n\nEND DOCUMENT\n\nSUMMARY:`;
 
   const { data: completionData } = api.example.getCompletion.useQuery(
@@ -164,14 +166,12 @@ const Home: NextPage = () => {
     }
   };
 
-  const maxTokenHandler = (event) => {
-    setMaxTokens(Number(event.target.value));
+  const handleMaxTokensChange = (e) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      setMaxTokens(Number(e.target.value));
+    }, 500);
   };
-
-  const handleMaxTokensChange = useMemo(
-    () => debounce(maxTokenHandler, 500),
-    []
-  );
 
   function handleCopy() {
     navigator.clipboard
