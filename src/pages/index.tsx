@@ -51,7 +51,7 @@ The Take Six Program is designed to provide you with the opportunity to:
 3. Get a degree
 `;
 
-const SAMPLE_DOCUMENT_3 = `\n\nDESCRIPTION
+const SAMPLE_DOCUMENT_g3 = `\n\nDESCRIPTION
 
 Job summary
 About Twitch
@@ -95,6 +95,7 @@ const Home: NextPage = () => {
   const [max_tokens, setMaxTokens] = useState(100);
   const [file, setFile] = useState(null);
   const [documentText, setDocumentText] = useState("");
+  const [summaryText, setSummaryText] = useState("");
 
   const prompt = `You are a document summarizer. \n\nSTART DOCUMENT:\n\n${SAMPLE_DOCUMENT}\n\nEND DOCUMENT\n\nSUMMARY:${SAMPLE_SUMMARY}\n\nSTART DOCUMENT:\n\n${documentText}\n\nEND DOCUMENT\n\nSUMMARY:`;
 
@@ -106,6 +107,10 @@ const Home: NextPage = () => {
     {
       // enabled: false,
       refetchOnWindowFocus: false,
+      onSuccess: (data) => {
+        console.log("data", data);
+        setSummaryText(data[0].text);
+      },
     }
   );
 
@@ -131,21 +136,24 @@ const Home: NextPage = () => {
     reader.readAsText(file);
   };
 
+  function handleCopy() {
+    navigator.clipboard
+      .writeText(summaryText)
+      .then(() => alert("Text copied to clipboard"))
+      .catch((err) => console.error("Could not copy text: ", err));
+  }
+
   return (
     <>
       <Head>
-        <title>OpenAI Files</title>
+        <title>OpenAI File Summarizer</title>
         <meta name="description" content="Created by @esmakov" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-col items-center gap-4 p-4">
         <h1 className="text-center text-4xl font-bold">File Summarizer</h1>
-        <p className="text-center text-xl">
-          Responds with up to {max_tokens} characters.
-        </p>
-        {completionData?.map((choice) => {
-          return <p className="text-center text-2xl">{choice.text}</p>;
-        })}
+        <p className="text-center text-xl">Upload a text file or PDF.</p>
+        <p className="max-w-lg text-center text-2xl">{summaryText}</p>
         <form
           onSubmit={handleSubmit}
           className="flex flex-col items-center gap-2"
@@ -161,6 +169,7 @@ const Home: NextPage = () => {
           >
             Upload
           </button>
+          <button onClick={handleCopy}>Copy to Clipboard</button>
         </form>
       </main>
     </>
